@@ -3,7 +3,7 @@ import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
 import connectDB from './config/db.js';
-import { PORT, CLIENT_URL } from './config/index.js';
+import { PORT } from './config/index.js';
 import { initIO } from './utils/io.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 
@@ -20,8 +20,11 @@ import walletRoutes from './routes/walletRoutes.js';
 const app = express();
 const server = http.createServer(app);
 
+// Demo app: reflect any frontend origin (local dev + deployed sites).
+const corsOptions = { origin: true, credentials: true };
+
 const io = new Server(server, {
-  cors: { origin: CLIENT_URL, methods: ['GET', 'POST'] },
+  cors: { origin: true, methods: ['GET', 'POST'] },
 });
 initIO(io);
 
@@ -29,7 +32,7 @@ io.on('connection', () => {
   // Realtime availability updates are broadcast as "parking:update" events.
 });
 
-app.use(cors({ origin: CLIENT_URL, credentials: true }));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '2mb' }));
 
 app.get('/api/health', (req, res) => res.json({ ok: true, service: 'parksmart-api' }));
